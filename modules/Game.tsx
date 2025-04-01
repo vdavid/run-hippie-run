@@ -196,7 +196,9 @@ const Game: React.FC = () => {
                 minDistance = Math.min(minDistance, distance)
             }
             const maxSize = windowSize ? Math.max(windowSize.width, windowSize.height) : 0
-            setMusicVolume(maxSize ? Math.max(0, Math.pow(1 - minDistance / (maxSize / 4), 2)) : 0)
+            const calculatedVolume = maxSize ? Math.max(0, Math.pow(1 - minDistance / (maxSize / 4), 2)) : 0
+            // Ensure volume is within valid range before setting
+            setMusicVolume(Math.max(0, Math.min(1, calculatedVolume)))
         }
 
         // Increase speed
@@ -331,22 +333,59 @@ const Game: React.FC = () => {
 }
 
 export const useBackgroundMusic = (volume: number, paused: boolean): void => {
-    const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
+    const audioRef = useRef<HTMLAudioElement | null>(null)
+    const [hasInteracted, setHasInteracted] = useState(false)
+
     useEffect(() => {
-        let currentAudio = audio
-        if (!currentAudio) {
-            currentAudio = new Audio('/romania-anthem.mp3')
-            currentAudio.loop = true
-            setAudio(currentAudio)
+        const handleInteraction = () => {
+            setHasInteracted(true)
+            // Remove the listeners once we've detected interaction
+            window.removeEventListener('click', handleInteraction)
+            window.removeEventListener('keydown', handleInteraction)
+            window.removeEventListener('touchstart', handleInteraction)
         }
-        currentAudio.volume = volume
-        if (!paused) {
-            // noinspection JSIgnoredPromiseFromCall
-            currentAudio.play()
+
+        window.addEventListener('click', handleInteraction)
+        window.addEventListener('keydown', handleInteraction)
+        window.addEventListener('touchstart', handleInteraction)
+
+        return () => {
+            window.removeEventListener('click', handleInteraction)
+            window.removeEventListener('keydown', handleInteraction)
+            window.removeEventListener('touchstart', handleInteraction)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!audioRef.current) {
+            audioRef.current = new Audio('/romania-anthem.mp3')
+            audioRef.current.loop = true
+        }
+
+        const audio = audioRef.current
+        // Ensure volume is within valid range (0-1)
+        audio.volume = Math.max(0, Math.min(1, volume))
+
+        if (paused || !hasInteracted) {
+            audio.pause()
         } else {
-            currentAudio.pause()
+            const playPromise = audio.play()
+            if (playPromise) {
+                playPromise.catch((error) => {
+                    // Ignore errors about user interaction - they're expected
+                    if (error.name !== 'NotAllowedError') {
+                        console.error('Error playing audio:', error)
+                    }
+                })
+            }
         }
-    }, [audio, paused, volume])
+
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause()
+            }
+        }
+    }, [volume, paused, hasInteracted])
 }
 
 export default Game
