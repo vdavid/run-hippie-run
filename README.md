@@ -1,6 +1,6 @@
 # Run Hippie Run
 
-A web application for tracking and visualizing running activities.
+A game where thee Romanians chase a hippie on a field.
 
 ## Getting Started
 

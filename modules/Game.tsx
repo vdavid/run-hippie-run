@@ -72,8 +72,8 @@ const Game: React.FC = () => {
             const loadImages = async () => {
                 // Start loading images
                 const [playerImg, chaserImg] = await Promise.all([
-                    loadImage('/run-hippie-run/player.svg'),
-                    loadImage('/run-hippie-run/romanian.svg'),
+                    loadImage('/player.svg'),
+                    loadImage('/romanian.svg'),
                 ])
                 setPlayer(
                     createCharacter(
@@ -335,7 +335,7 @@ export const useBackgroundMusic = (volume: number, paused: boolean): void => {
     useEffect(() => {
         let currentAudio = audio
         if (!currentAudio) {
-            currentAudio = new Audio('/run-hippie-run/romania-anthem.mp3')
+            currentAudio = new Audio('/romania-anthem.mp3')
             currentAudio.loop = true
             setAudio(currentAudio)
         }

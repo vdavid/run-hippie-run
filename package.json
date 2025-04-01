@@ -1,5 +1,6 @@
 {
     "name": "run-hippie-run",
+    "description": "A game where thee Romanians chase a hippie on a field.",
     "version": "0.1.0",
     "private": true,
     "scripts": {
@@ -8,7 +9,7 @@
         "start": "next start",
         "lint": "next lint",
         "format": "prettier --write .",
-        "test": "vitest",
+        "test": "vitest run",
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
